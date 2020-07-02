@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html">
+    <h:head>
+        <title>JNDI View</title>
+    </h:head>
+    <h:body>
+        <h1>JNDI View</h1>
+
+        <h3>Search Criteria</h3>
+        <h:form>
+            <h:panelGrid columns="2">
+                <h:outputLabel value="List of JNDI tree entries" />
+                <h:commandButton value="list" action="#{index.list}" />
+
+                <h:inputText value="#{index.name}"  size="30"/>
+                <h:commandButton value="list context" action="#{index.listContext}" />
+            </h:panelGrid>
+        </h:form>
+        <br />
+
+        <h3><h:outputLabel value="#{index.resultTitle}" /></h3>
+        <h:dataTable var="item" value="#{index.result}">
+            <h:column>#{item}</h:column>
+        </h:dataTable>
+
+    </h:body>
+</html>
+

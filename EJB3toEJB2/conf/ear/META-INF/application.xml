@@ -1,0 +1,12 @@
+<application 
+	xmlns="http://java.sun.com/xml/ns/javaee" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    version="6"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/application_6.xsd">
+  <display-name>EJB3toEJB2EAR</display-name>
+  <module>
+    <ejb>EJB3toEJB2-ejb.jar</ejb>
+  </module>
+</application>
+
+

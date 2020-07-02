@@ -1,0 +1,220 @@
+<project name="Basic Build Script" default="about" basedir=".">
+	
+	<description>
+		Enterprise Java Beans Samples
+		Copyright (c) 2007, iten-engineering.ch
+		
+		build script with base targes to build and deplay an enterprise 
+		archive file.
+		
+		note: 
+		there is no compile target since the scripts will run inside 
+		the IDe and there's (yet) no need to run them stand-alone.
+	</description>
+
+	<!-- 
+	 // =======================================================================
+	 // properties
+	 // =======================================================================
+	-->
+
+	<!--
+	 * default application name
+	 * note: must be overridden by the single projects by defining
+	 * the same property before this script (basic.xml) is included
+	-->
+	<property name="application.name"	value="default" />
+	
+
+	<!--
+	 * define filenames used for naming the project deliverables
+	 * (jar, war and ear files).
+	-->
+	<property name="filename"           value="${application.name}" />
+	<property name="filename.ejb"		value="${filename}-ejb.jar" />
+	<property name="filename.war" 		value="${filename}.war" />
+	<property name="filename.ear" 		value="${filename}.ear" />
+	
+
+	<!--
+	 * define library and project directory locations 
+	 * used troughout the build process
+	--> 
+	<property name="project.conf"		location="conf" />
+	<property name="project.classes"	location="bin" />
+	<property name="project.dist"		location="dist" />
+	<property name="project.tmp"		location="build/tmp" />
+		
+
+	<!-- 
+	 * glassfish server
+	-->
+	<!-- <property name="glassfish" 		value="uncomment to enable" /> -->
+	<property name="glassfish.as-install"	location="../../software/glassfish-3" />
+	
+
+	<!-- 
+	 * jboss server
+	-->
+	<property name="jboss" 		    	value="uncomment to enable" />
+	<property name="jboss.root"			location="../../software/jboss-as-7.1.1.Final/standalone" />
+	<property name="jboss.deploy"		location="${jboss.root}/deployments" />
+	
+	
+	<!-- 
+	 // =======================================================================
+	 // targets
+	 // =======================================================================
+	-->
+
+	<target name="about">
+		<echo>
+			Enterprise Java Beans Samples
+			Copyright (c) 2007, iten-engineering.ch
+			
+			build script with base targes to build and deplay an enterprise
+			archive file.
+		</echo>
+	</target>
+
+	<!--  
+	 * 
+	 * build 
+	 *
+	-->
+	<target name="build_ear" depends="build_ejb, build_war">
+		<mkdir dir="${project.tmp}" />
+		<copy todir="${project.tmp}">
+			<fileset dir="${project.dist}" includes="${filename.ejb}" />
+		</copy>
+		<copy todir="${project.tmp}">
+			<fileset dir="${project.dist}" includes="${filename.war}" />
+		</copy>
+		<copy todir="${project.tmp}">
+			<fileset dir="${project.conf}/ear" /> 
+		</copy>
+		<jar destfile="${project.dist}/${filename.ear}"  basedir="${project.tmp}"	/>
+		<delete dir="${project.tmp}" />
+	</target>
+
+	<target name="build_ejb">
+		<mkdir dir="${project.tmp}" />
+		<copy todir="${project.tmp}">
+			<fileset dir="${project.classes}" includes="**/*.class" excludes="**/client/*.class"/>
+		</copy>
+		<copy todir="${project.tmp}" failonerror="false" >
+			<fileset dir="${project.conf}/ejb" /> 
+		</copy>
+		<jar destfile="${project.dist}/${filename.ejb}"  basedir="${project.tmp}"	/>
+		<delete dir="${project.tmp}" />
+	</target>
+
+	<target name="build_war" if="include.war">
+		<mkdir dir="${project.tmp}" />
+		<copy todir="${project.tmp}/WEB-INF/classes">
+			<fileset dir="${project.classes}" includes="**/*.class" excludes="**/ejb/*.class"/>
+		</copy>
+		<copy todir="${project.tmp}" failonerror="false" >
+			<fileset dir="${project.conf}/web" /> 
+		</copy>
+		<jar destfile="${project.dist}/${filename.war}"  basedir="${project.tmp}"	/>
+		<delete dir="${project.tmp}" />
+	</target>
+	
+	
+	<!-- 
+	 * 
+	 * deploy / undeploy  ear and war
+	 *
+	-->
+	<target name="deploy_ear">
+		<antcall target="_glassfish_deploy">
+			<param name="param.file" value="${project.dist}/${filename.ear}"  />
+		</antcall>
+		<antcall target="_jboss_deploy">
+			<param name="param.file" value="${project.dist}/${filename.ear}"  />
+		</antcall>
+	</target>
+
+	<target name="undeploy_ear">
+		<antcall target="_glassfish_undeploy">
+			<param name="param.file" value="${filename}"  />
+		</antcall>
+		<antcall target="_jboss_undeploy">
+			<param name="param.file" value="${filename.ear}"  />
+		</antcall>
+	</target>
+
+	<target name="deploy_war">
+		<antcall target="_glassfish_deploy">
+			<param name="param.file" value="${project.dist}/${filename.war}"  />
+		</antcall>
+		<antcall target="_jboss_deploy">
+			<param name="param.file" value="${project.dist}/${filename.war}"  />
+		</antcall>
+	</target>
+	
+	<target name="undeploy_war">
+		<antcall target="_glassfish_undeploy">
+			<param name="param.file" value="${filename.war}"  />
+		</antcall>
+		<antcall target="_jboss_undeploy">
+			<param name="param.file" value="${filename.war}"  />
+		</antcall>
+	</target>
+
+	
+  	<!--
+	 * deploy artefact to glassfish server with the asadmin tool
+	 *
+	 * param.file	
+	 *		filename (incl. the path) of the artefact (ear, war) to deploy
+	-->
+	<target name="_glassfish_deploy" if="glassfish">
+		<echo>Start deploying ${param.file} to Glassfish...</echo>
+	 	<exec executable="${glassfish.as-install}\bin\asadmin">
+			<arg value="deploy"/>
+			<arg value="--force"/>
+		    <arg value="${param.file}"/>
+		</exec>
+	</target>
+	
+  	<!--
+	 * undeploy artefact from glassfish server with the asadmin tool
+	 *
+	 * param.file	
+	 *		name (without the path and extension) of the artefact (ear, war) 
+	 *		to remove from the deploy directory
+	-->
+	<target name="_glassfish_undeploy" if="glassfish">
+		<echo>Start undeploying ${param.file} from Glassfish...</echo>
+	 	<exec executable="${glassfish.as-install}\bin\asadmin">
+			<arg value="undeploy"/>
+		    <arg value="${param.file}"/>
+		</exec>
+	</target>
+
+	<!--
+	 * deploy artefact to jboss server by copying it into the deploy directory
+	 *
+	 * param.file	
+	 *		filename (incl. the path) of the artefact (ear, war) to deploy
+	-->
+	<target name="_jboss_deploy" if="jboss">
+		<echo>Start deploying ${param.file} to JBoss...</echo>
+		<copy file="${param.file}" todir="${jboss.deploy}" />
+	</target>
+	
+  	<!--
+	 * undeploy artefact from jboss server by copying it into the deploy directory
+	 *
+	 * param.file	
+	 *		filename (without the path) of the artefact (ear, war) 
+	 *		to remove from the deploy directory
+	-->
+	<target name="_jboss_undeploy" if="jboss">
+		<echo>Start undeploying ${param.file} from JBoss...</echo>
+		<delete file="${jboss.deploy}/${param.file}" />
+	</target>
+	
+</project>

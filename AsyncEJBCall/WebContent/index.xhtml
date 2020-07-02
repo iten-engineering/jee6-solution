@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html">
+    <h:head>
+        <title>AsyncEJBCall</title>
+    </h:head>
+    <h:body>
+        <h1>AsyncEJBCall</h1>
+
+        <h:form>
+            <h:panelGrid columns="6">
+                <h:outputLabel value="Messsage to save: " />
+                <h:inputText value="#{index.message}"  size="15" />
+				<h:commandButton value="saveSync" action="#{index.saveSync}" />
+				<h:commandButton value="saveAsync" action="#{index.saveAsync}" />
+				<h:commandButton value="saveAsyncFuture" action="#{index.saveAsyncFuture}" />
+				<h:commandButton value="saveAsyncException" action="#{index.saveAsyncException}" />
+            </h:panelGrid>
+        </h:form>
+
+        <br />
+
+		<h2>Result</h2>
+		<h:column>#{index.result}</h:column>
+
+    </h:body>
+</html>
+
